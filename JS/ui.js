@@ -6,8 +6,8 @@ export function renderTareas(){
 
     let filtroArray = state.tareas.filter( t =>{
         if(state.filtro === "all") return true;
-        if(state.filtro === "completado") return t.completado;
-        if(state.filtro === "pendientes") return !t.completado;
+        if(state.filtro === "completed") return t.completado;
+        if(state.filtro === "pending") return !t.completado;
     })
 
     // verificamos si hay tareas

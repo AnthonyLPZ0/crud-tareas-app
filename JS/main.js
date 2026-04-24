@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { cargarTareas, guardarTareas, obtenerTareasDesdeAPI } from "./storage.js";
+import { guardarTareas, obtenerTareasDesdeAPI } from "./storage.js";
 import { renderTareas } from "./ui.js";
 
 // variable para las acciones y valores
@@ -24,7 +24,7 @@ async function init() {
     containerLista.addEventListener("click", handleClickLista);
 
     // delegacion para los filtro
-    containerFiltro.addEventListener("click", handleFiltroTarea);
+    containerFiltro.addEventListener("click", handleClickFiltro);
 }
 
 // function para agregar la nueva tarea (1)

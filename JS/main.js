@@ -129,15 +129,29 @@ function handleClickLista(e){
 }
 
 // funcion para eliminar la tarea (3)
-function handleEliminarTarea(id){ 
-    actualizarState(
-        state.tareas.filter( t => t.id !== id)
-    );
+async function handleEliminarTarea(id){ 
 
-    // si eliminaste la que estabas editando
-    if(state.edicion === id){
-        resetFormulario();
+    try {
+        // elimina datos del servidor
+        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+            method: "DELETE"
+        });
+    
+        if(!response.ok) throw new Error();
+    
+        actualizarState(
+            state.tareas.filter( t => t.id !== id)
+        );
+    
+        // si eliminaste la que estabas editando
+        if(state.edicion === id){
+            resetFormulario();
+        }
+    } catch (error) {
+        console.log(error);
+        alert("Error al eliminar la tarea");
     }
+    
 }
 
 // function para editar la tarea(4)

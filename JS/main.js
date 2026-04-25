@@ -37,6 +37,19 @@ async function handleAgregarTarea(){
     
     // SI ESTA EN MODO EDICION
     if (state.edicion !== null) {
+
+        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${state.edicion}`,{
+            method: "PATCH",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                title:valorInput
+            })
+        });
+
+        if(!response.ok) throw new Error();
+
         actualizarState(
             state.tareas.map(t => 
                 t.id === state.edicion
@@ -172,7 +185,17 @@ function handleEditarTarea(id){
 }
 
 // function para el toggle (completado o no) (5)
-function handleCompletado(id){
+async function handleCompletado(id){
+
+    const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+        method:"PATCH",
+        headers:{
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            completed:!tarea.completado 
+        })
+    })
     actualizarState(
         state.tareas.map(t => 
             t.id === id

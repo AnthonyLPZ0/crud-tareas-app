@@ -28,7 +28,7 @@ async function init() {
 }
 
 // function para agregar la nueva tarea (1)
-function handleAgregarTarea(){
+async function handleAgregarTarea(){
     const valorInput = inputTarea.value;
     const valorSelect = selectNivel.value;
     
@@ -51,14 +51,49 @@ function handleAgregarTarea(){
 
     }else{
         // MODO CREAR TAREA 
+        // const nuevaTarea = {
+        //     id: Date.now(),
+        //     contenido: valorInput,
+        //     completado: false,
+        //     dificultad: valorSelect,
+        //     fecha: new Date().toISOString()
+        // };
+
+        // OBJETO PARA API
+        // adaptar tu data al formato que la API entiende
+        const tareaAPI = {
+            title: valorInput,
+            completed:false
+        }
+        
+        // enviar datos al servidor
+        const response = await fetch("https://jsonplaceholder.typicode.com/todos", {
+            method: "POST",
+
+            // decirle a la API: "te estoy enviando JSON"
+            headers: {
+                "Content-Type":"application/json"
+            },
+
+            // convertir objeto JS → string JSON
+            body: JSON.stringify(tareaAPI)
+        });
+
+        if(!response.ok) throw new Error();
+
+        // convertir respuesta → objeto usable
+        const data = await response.json();
+
+        // mantener tu app con tu propio formato interno
         const nuevaTarea = {
-            id: Date.now(),
-            contenido: valorInput,
-            completado: false,
+            id:data.id,
+            contenido: data.title,
+            completado: data.completed,
             dificultad: valorSelect,
             fecha: new Date().toISOString()
-        };
-        
+        }
+
+        // sincronizar UI + storage + render
         actualizarState([...state.tareas,nuevaTarea]);
     }
     

@@ -23,19 +23,7 @@ export async function obtenerTareasDesdeAPI(){
         
         const data = await response.json();
     
-        const info = data.map(t => {
-            return{
-                id:t.id,
-                contenido:t.title,
-                completado: t.completed,
-                dificultad: "facil",
-                fecha: new Date().toISOString()
-            }
-        }).slice(0,10);
-
-        // y si existe, lo convertimos en objeto por parse.
-        // antes -> return JSON.parse(data);
-        return info; 
+        return data;
 
     } catch (error) {
         console.error(error);

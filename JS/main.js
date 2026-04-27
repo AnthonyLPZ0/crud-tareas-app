@@ -1,4 +1,5 @@
 import { createTodo, deleteTodo, toggleTodo, updateTodo } from "./api.js";
+import { mapTodo } from "./mapper.js";
 import { state } from "./state.js";
 import { guardarTareas, obtenerTareasDesdeAPI } from "./storage.js";
 import { renderTareas, mostrarMensaje } from "./ui.js";
@@ -14,7 +15,8 @@ async function init() {
 
     // cargar datos
     // antes -> state.tareas = cargarDatos();
-    state.tareas = await obtenerTareasDesdeAPI();
+    const data = await obtenerTareasDesdeAPI();
+    state.tareas = data.slice(0,10).map(mapTodo)
 
     renderTareas();
 
@@ -191,7 +193,7 @@ async function handleCompletado(id){
                 t.id === id
                 ? {
                     ...t,
-                    completado: !t.completado
+                    completado: nuevoEstado
                 }
                 : t
             )

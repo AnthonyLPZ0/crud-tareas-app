@@ -1,24 +1,25 @@
-# CRUD de Tareas
+# Task Manager App (CRUD + API)
 
-Aplicación web que permite gestionar tareas (crear, editar, eliminar y listar) consumiendo una API externa.
+Aplicación web que permite gestionar tareas consumiendo una API externa.
 
-## 🚀 Demo
-https://anthonylpz0.github.io/crud-tareas-app/
+## 🚀 Funcionalidades
+- Obtener tareas (GET)
+- Crear tareas (POST)
+- Actualizar tareas (PATCH)
+- Eliminar tareas (DELETE)
+- Filtros (all, completed, pending)
+- Contador dinámico
+- Feedback al usuario
+- Manejo de errores
 
 ## 🛠️ Tecnologías
-- HTML
-- CSS
-- JavaScript
+- JavaScript (ES Modules)
 - Fetch API
+- HTML + CSS
 
-## ⚙️ Funcionalidades
-- Listado de tareas (GET)
-- Crear tareas (POST)
-- Editar tareas (PUT)
-- Eliminar tareas (DELETE)
-- Render dinámico
+## 🧠 Conceptos aplicados
 - Manejo de estado
-
-## 📦 Instalación
-1. Clonar el repositorio
-2. Abrir index.html en el navegador
+- Arquitectura modular
+- Async/Await
+- Manipulación del DOM
+- Consumo de APIs REST

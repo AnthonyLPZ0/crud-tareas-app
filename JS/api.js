@@ -41,3 +41,17 @@ export async function deleteTodo(id) {
     if(!response.ok) throw new Error();
 
 }
+
+export async function toggleTodo(id,nuevoEstado){
+    const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+        method:"PATCH",
+        headers:{
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            completed: nuevoEstado
+        })
+    })
+
+    return await response.json();
+}

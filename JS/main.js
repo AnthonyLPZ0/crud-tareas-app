@@ -1,4 +1,4 @@
-import { createTodo, deleteTodo, updateTodo } from "./api.js";
+import { createTodo, deleteTodo, toggleTodo, updateTodo } from "./api.js";
 import { state } from "./state.js";
 import { guardarTareas, obtenerTareasDesdeAPI } from "./storage.js";
 import { renderTareas, mostrarMensaje } from "./ui.js";
@@ -180,17 +180,12 @@ async function handleCompletado(id){
 
     const tarea = state.tareas.find(t => t.id === id);
 
+    const nuevoEstado = !tarea.completado;
+
     try {
         // actualizar tareas existentes usando el método PATCH.
-        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
-            method:"PATCH",
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                completed:!tarea.completado 
-            })
-        })
+        await toggleTodo(id, nuevoEstado);
+
         actualizarState(
             state.tareas.map(t => 
                 t.id === id
@@ -202,7 +197,7 @@ async function handleCompletado(id){
             )
         )
 
-        mostrarMensaje("Se ha completado la tarea");
+        mostrarMensaje(nuevoEstado ? "Tarea Completada" : "Tarea marcada como pendiente");
     } catch (error) {
         console.log(error);
         alert("Error al guardar la tarea");

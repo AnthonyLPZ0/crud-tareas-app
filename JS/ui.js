@@ -2,7 +2,32 @@ import { state } from "./state.js";
 
 const containerLista = document.getElementById("listaTarea");
 
+const containerFiltro = document.getElementById("contador");
+
+const mensaje = document.getElementById("mensaje");
+
+export function mostrarMensaje(texto){
+    mensaje.textContent = texto;
+
+    setTimeout(() => {
+        mensaje.textContent = "";
+    }, 2000);
+}
+
 export function renderTareas(){
+
+    const total = state.tareas.length;
+
+    const completados = state.tareas.filter(t => t.completado).length
+
+    const pendientes = total - completados;
+
+    containerFiltro.innerHTML = 
+    `
+        <span>Total: ${total}</span>
+        <span>Completados: ${completados}</span>
+        <span>Pendientes: ${pendientes}</span>
+    `
 
     let filtroArray = state.tareas.filter( t =>{
         if(state.filtro === "all") return true;

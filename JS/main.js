@@ -1,6 +1,7 @@
+import { createTodo, deleteTodo, updateTodo } from "./api.js";
 import { state } from "./state.js";
 import { guardarTareas, obtenerTareasDesdeAPI } from "./storage.js";
-import { renderTareas } from "./ui.js";
+import { renderTareas, mostrarMensaje } from "./ui.js";
 
 // variable para las acciones y valores
 const containerLista = document.getElementById("listaTarea");
@@ -35,89 +36,79 @@ async function handleAgregarTarea(){
     if(valorInput.trim() === "") 
         return alert("La tarea no puede estar vacia");
     
-    // SI ESTA EN MODO EDICION
-    if (state.edicion !== null) {
+    try {
 
-        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${state.edicion}`,{
-            method: "PATCH",
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title:valorInput
-            })
-        });
+        // SI ESTA EN MODO EDICION
+        if (state.edicion !== null) {
 
-        if(!response.ok) throw new Error();
+            btnAgregar.disabled = true;
+            btnAgregar.textContent = "Cargando..."
+            
+            await updateTodo(state.edicion, {title: valorInput});
 
-        actualizarState(
-            state.tareas.map(t => 
-                t.id === state.edicion
-                ? {
-                    ...t,
-                    contenido: valorInput,
-                    dificultad: valorSelect
-                }
-                :t
-            )
-        );
+            actualizarState(
+                state.tareas.map(t => 
+                    t.id === state.edicion
+                    ? {
+                        ...t,
+                        contenido: valorInput,
+                        dificultad: valorSelect
+                    }
+                    :t
+                )
+            );
 
-    }else{
-        // MODO CREAR TAREA 
-        // const nuevaTarea = {
-        //     id: Date.now(),
-        //     contenido: valorInput,
-        //     completado: false,
-        //     dificultad: valorSelect,
-        //     fecha: new Date().toISOString()
-        // };
+            mostrarMensaje("Tarea Actualizada");
+            
+        }else{
 
-        // OBJETO PARA API
-        // adaptar tu data al formato que la API entiende
-        const tareaAPI = {
-            title: valorInput,
-            completed:false
+            
+            // MODO CREAR TAREA 
+            // const nuevaTarea = {
+            //     id: Date.now(),
+            //     contenido: valorInput,
+            //     completado: false,
+            //     dificultad: valorSelect,
+            //     fecha: new Date().toISOString()
+            // };
+            
+            // OBJETO PARA API
+            // adaptar tu data al formato que la API entiende
+            const tareaAPI = {
+                title: valorInput,
+                completed:false
+            }
+            
+            const data = await createTodo(tareaAPI);
+
+            // mantener tu app con tu propio formato interno
+            const nuevaTarea = {
+                id:data.id,
+                contenido: data.title,
+                completado: data.completed,
+                dificultad: valorSelect,
+                fecha: new Date().toISOString()
+            }
+            
+            // sincronizar UI + storage + render
+            actualizarState([...state.tareas,nuevaTarea]);
+            mostrarMensaje("Tarea Creada");
         }
-        
-        // enviar datos al servidor
-        const response = await fetch("https://jsonplaceholder.typicode.com/todos", {
-            method: "POST",
-
-            // decirle a la API: "te estoy enviando JSON"
-            headers: {
-                "Content-Type":"application/json"
-            },
-
-            // convertir objeto JS → string JSON
-            body: JSON.stringify(tareaAPI)
-        });
-
-        if(!response.ok) throw new Error();
-
-        // convertir respuesta → objeto usable
-        const data = await response.json();
-
-        // mantener tu app con tu propio formato interno
-        const nuevaTarea = {
-            id:data.id,
-            contenido: data.title,
-            completado: data.completed,
-            dificultad: valorSelect,
-            fecha: new Date().toISOString()
+            resetFormulario();
+        } catch (error) {
+            console.log(error);
+            alert("Error al guardar la tarea");
+        }finally{
+            btnAgregar.disabled = false;
+            btnAgregar.textContent = "Agregar";
         }
-
-        // sincronizar UI + storage + render
-        actualizarState([...state.tareas,nuevaTarea]);
-    }
-    
-    resetFormulario();
 }
 
 // funcion para la delegacion de eventos(2)
 function handleClickLista(e){
-
+        
     const action = e.target.dataset.action;
-
+        
     if(!action) return;
 
     const id = Number(e.target.dataset.id);
@@ -144,14 +135,12 @@ function handleClickLista(e){
 // funcion para eliminar la tarea (3)
 async function handleEliminarTarea(id){ 
 
+    if(!confirm("¿Seguro que quieres eliminar?")) return;
+
     try {
-        // elimina datos del servidor
-        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
-            method: "DELETE"
-        });
-    
-        if(!response.ok) throw new Error();
-    
+        
+        await deleteTodo(id);
+
         actualizarState(
             state.tareas.filter( t => t.id !== id)
         );
@@ -160,6 +149,8 @@ async function handleEliminarTarea(id){
         if(state.edicion === id){
             resetFormulario();
         }
+
+        mostrarMensaje("Se ha eliminado la tarea correctamente");
     } catch (error) {
         console.log(error);
         alert("Error al eliminar la tarea");
@@ -187,25 +178,35 @@ function handleEditarTarea(id){
 // function para el toggle (completado o no) (5)
 async function handleCompletado(id){
 
-    const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
-        method:"PATCH",
-        headers:{
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            completed:!tarea.completado 
+    const tarea = state.tareas.find(t => t.id === id);
+
+    try {
+        // actualizar tareas existentes usando el método PATCH.
+        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+            method:"PATCH",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                completed:!tarea.completado 
+            })
         })
-    })
-    actualizarState(
-        state.tareas.map(t => 
-            t.id === id
-            ? {
-                ...t,
-                completado: !t.completado
-            }
-            : t
+        actualizarState(
+            state.tareas.map(t => 
+                t.id === id
+                ? {
+                    ...t,
+                    completado: !t.completado
+                }
+                : t
+            )
         )
-    )
+
+        mostrarMensaje("Se ha completado la tarea");
+    } catch (error) {
+        console.log(error);
+        alert("Error al guardar la tarea");
+    }
 }
 
 // fucnion para click en filtro

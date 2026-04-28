@@ -84,13 +84,9 @@ async function handleAgregarTarea(){
             const data = await createTodo(tareaAPI);
 
             // mantener tu app con tu propio formato interno
-            const nuevaTarea = {
-                id:data.id,
-                contenido: data.title,
-                completado: data.completed,
-                dificultad: valorSelect,
-                fecha: new Date().toISOString()
-            }
+            const nuevaTarea = mapTodo(data);
+
+            nuevaTarea.dificultad = valorSelect;
             
             // sincronizar UI + storage + render
             actualizarState([...state.tareas,nuevaTarea]);
@@ -152,10 +148,13 @@ async function handleEliminarTarea(id){
             resetFormulario();
         }
 
-        mostrarMensaje("Se ha eliminado la tarea correctamente");
+        btnAgregar.disabled = true;
+        mostrarMensaje("Tarea eliminada");
     } catch (error) {
         console.log(error);
         alert("Error al eliminar la tarea");
+    }   finally{
+        btnAgregar.disabled = false;
     }
     
 }
@@ -181,6 +180,8 @@ function handleEditarTarea(id){
 async function handleCompletado(id){
 
     const tarea = state.tareas.find(t => t.id === id);
+
+    if(!tarea) return;
 
     const nuevoEstado = !tarea.completado;
 
